@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View, Image, TextInput} from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Image, TextInput, FlatList} from 'react-native';
 import { Button } from 'react-native-elements';
 import firebase from 'firebase';
 import moment from 'moment';
@@ -11,7 +11,7 @@ export default class App extends React.Component {
   state = { 
     name: null, 
     email: null ,
-    value:null
+    localContacts:[],
   }
 
   onChange = (value) => {
@@ -23,22 +23,34 @@ export default class App extends React.Component {
     this.setState({ name: null });
     this.setState({ email: null });
   }
-
-  handleSubmit = () => {
+  handleUploadContact = (newPaddler) => {
     const today= moment().format('MMM-DD-YY')
-    firebase.database().ref(today + '/'+ this.state.name).set({
-      name:this.state.name,
-      email:this.state.email
-    })
-    .then( ()=>{
-      alert("Mahalo for signing up! we'll email you with more details!");
-      this.clearForm();
+    firebase.database().ref(today + '/'+ newPaddler.name).set({
+      name:newPaddler.name,
+      email:newPaddler.email
     })
     .catch((error)=>{
       console.log(error);
       
     })    
   }
+  handleUploadContacts = () => {
+    this.state.localContacts.map( (contact) => {
+      this.handleUploadContact(contact)
+    })
+    this.setState({localContacts: []})
+    console.log("local contacts after upload", this.state.localContacts);
+    
+  }
+  handleSubmit = () => {
+    const newPaddler = {name: this.state.name, email:this.state.email};
+    this.state.localContacts.push(newPaddler);
+    alert("Mahalo for signing up! we'll email you with more details for our open house!");
+    this.clearForm();
+    console.log("local contacts", this.state.localContacts);
+    
+  }
+
   componentWillMount(){
     const config = firebaseConfig.config
 
@@ -66,50 +78,61 @@ export default class App extends React.Component {
             flex: 1,
             justifyContent: 'space-between'
         }}>
-          <View style={[styles.container]}>
-              <View style={styles.headerStyle}>
-                <Image source={require('./src/images/header_copy.png')} style={styles.logoStyle}/>
-                <View style={styles.headerTextStyle}>
-                  <Text style={{textAlign:'center', fontSize:20, fontWeight:'700', color:'white'}}>Team Arizona Outrigger Canoe Club</Text>
-                </View>
-                <View style={styles.headerTextStyle}>
-                  <Text style={{fontSize:18, fontWeight:'100', color:'white'}}> Sign up for more details on paddling with us</Text>
-                </View>
+        <View style={[styles.container]}>
+            <View style={styles.headerStyle}>
+              <Image source={require('./src/images/header_copy.png')} style={styles.logoStyle}/>
+              <View style={styles.headerTextStyle}>
+                <Text style={{textAlign:'center', fontSize:20, fontWeight:'700', color:'white'}}>Team Arizona Outrigger Canoe Club</Text>
               </View>
-              <View style={styles.formStyle}>
-                  <View style={styles.inputGroupStyle}>
-                    <Text style={styles.textStyle}>Name</Text>
-                    <TextInput 
-                      style={styles.inputStyle}
-                      onChangeText={(name) => this.setState({name})}
-                      value={this.state.name}
-                      autoCorrect={false}
-                      autoFocus
-                    />
-                  </View>
-                  <View style={styles.inputGroupStyle}>
-                    <Text style={styles.textStyle}>Email</Text>
-                    <TextInput 
-                      style={styles.inputStyle}
-                      onChangeText={(email) => this.setState({email})}
-                      value={this.state.email}   
-                      placeholder="email@gmail.com"  
-                      placeholderTextColor='rgba(255,255,255,.5)'       
-                    />
-                  </View>
-                  <View style={{marginHorizontal:50}}>
-                    <Button
-                      title="Sign Up!"
-                      onPress={this.handleSubmit}
-                      style={styles.buttonStyle}
-                      backgroundColor={'#e74c3c'}
-                      color={'#FF0000'}
-                      fontSize={50}
-                    />
-                  </View>
+              <View style={styles.headerTextStyle}>
+                <Text style={{fontSize:18, fontWeight:'100', color:'white'}}> Sign up for more details on paddling with us</Text>
               </View>
+            </View>
+            <View style={styles.formStyle}>
+                <View style={styles.inputGroupStyle}>
+                  <Text style={styles.textStyle}>Name</Text>
+                  <TextInput 
+                    style={styles.inputStyle}
+                    onChangeText={(name) => this.setState({name})}
+                    value={this.state.name}
+                    autoCorrect={false}
+                    autoFocus
+                  />
+                </View>
+                <View style={styles.inputGroupStyle}>
+                  <Text style={styles.textStyle}>Email</Text>
+                  <TextInput 
+                    style={styles.inputStyle}
+                    onChangeText={(email) => this.setState({email})}
+                    value={this.state.email}   
+                    placeholder="email@gmail.com"  
+                    placeholderTextColor='rgba(255,255,255,.5)'       
+                  />
+                </View>
+                <View style={{marginHorizontal:50}}>
+                  <Button
+                    title="Sign Up!"
+                    onPress={this.handleSubmit}
+                    style={styles.buttonStyle}
+                    backgroundColor={'#e74c3c'}
+                    color={'#FF0000'}
+                    fontSize={50}
+                  />
+                </View>
+                <View style={{marginHorizontal:50}}>
+                  <Button
+                    title="Upload Local Contacts to database"
+                    onPress={this.handleUploadContacts}
+                    style={styles.buttonStyle}
+                    backgroundColor={'#e74c3c'}
+                    color={'#FF0000'}
+                    fontSize={50}
+                  />
+                </View> 
+                                  
+            </View>
           </View>
-        </ScrollView>
+      </ScrollView>
     );
   }
 }

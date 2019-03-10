@@ -1,9 +1,0 @@
-{
-  config : {
-  apiKey: "AIzaSyCKGW19fAAyEn2vpsKnLz7Ig2CsURKzuRU",
-  authDomain: "tazcontacts.firebaseapp.com",
-  databaseURL: "https://tazcontacts.firebaseio.com",
-  projectId: "tazcontacts",
-  storageBucket: "tazcontacts.appspot.com",
-  messagingSenderId: "443045270667"
-}}
